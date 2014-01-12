@@ -1,0 +1,1 @@
+This file should not prevent the 'array' folder from being treated as an array, because it should be excluded.

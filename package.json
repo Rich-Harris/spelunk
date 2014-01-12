@@ -1,0 +1,12 @@
+{
+	"name": "spelunk",
+	"author": "Rich Harris",
+	"version": "0.1.0",
+	"main": "spelunk.js",
+	"dependencies": {
+		"minimatch": "~0.2.14"
+	},
+	"scripts": {
+		"test": "node test/spelunk_tests.js"
+	}
+}

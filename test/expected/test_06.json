@@ -1,0 +1,9 @@
+{
+	"someText": "here is some text",
+	"array": [
+		"zero",
+		"one",
+		"two",
+		"three"
+	]
+}
