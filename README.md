@@ -31,32 +31,22 @@ data
 
 ```js
 {
-  config: {
-    // contents of config.json (parsed as JSON)
-  },
+  config: { <contents of config.json> }, // parsed as JSON
   tables: {
-    population: // contents of population.csv (as a string)
-    growth:     // contents of growth.csv
+    population: <contents of population.csv> // as a string
+    growth:     <contents of growth.csv>
   },
   slides: [
-    contents of 0.txt,  // because these files have
-    contents of 1.txt,  // numeric names, `slides` is
-    contents of 2.txt,  // an array, not an object
-    contents of 3.txt
+    <contents of 0.txt>,  // because these files have
+    <contents of 1.txt>,  // numeric names, `slides` is
+    <contents of 2.txt>,  // an array, not an object
+    <contents of 3.txt>
   ],
   i18n: {
-    "en-GB": {
-      // contents of en-GB.json
-    },
-    "en-US": {
-      // contents of en-US.json
-    },
-    "fr": {
-      // contents of fr.json
-    },
-    "de": {
-      // contents of de.json
-    },
+    "en-GB": <contents of en-GB.json>,
+    "en-US": <contents of en-US.json>,
+    "fr":    <contents of fr.json>,
+    "de":    <contents of de.json>,
     ...
   }
 }
@@ -89,7 +79,7 @@ Exclude files that match a certain pattern (this uses [minimatch](https://github
 spelunk( 'myFolder', { exclude: '**/README.md' }, callback );
 ```
 
-Flatten a folder into a JSON file, so it can be consumed by a browser with a single HTTP request (see also [grunt-spelunk](https://github.com/Rich-Harris/grunt-spelunk):
+Flatten a folder into a JSON file, so it can be consumed by a browser with a single HTTP request (see also [grunt-spelunk](https://github.com/Rich-Harris/grunt-spelunk)):
 
 ```js
 fs = require( 'fs' );
