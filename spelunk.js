@@ -1,6 +1,6 @@
 var fs, path, minimatch;
 
-fs = require( 'fs' );
+fs = require( 'graceful-fs' );
 path = require( 'path' );
 minimatch = require( 'minimatch' );
 
