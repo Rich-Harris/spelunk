@@ -1,5 +1,6 @@
 {
 	"name": "spelunk",
+	"description": "Traverse a folder in node, turning its contents into an object for easy consumption",
 	"version": "0.1.0",
 	"homepage": "https://github.com/Rich-Harris/spelunk",
 	"author": {
