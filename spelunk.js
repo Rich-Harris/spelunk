@@ -97,7 +97,7 @@ function getDir ( prefix, dir, options, gotDir ) {
 				}
 
 				else {
-					key = getKey( fileName );
+					key = getKey( fileName, options );
 					getFile( dirPath, fileName, gotFile );
 				}
 
@@ -131,10 +131,10 @@ function getFile ( prefix, fileName, gotFile ) {
 
 
 // Get key from path, e.g. 'project/data/config.json' -> 'config'
-function getKey ( fileName ) {
+function getKey ( fileName, options ) {
 	var lastDotIndex = fileName.lastIndexOf( '.' );
 
-	if ( lastDotIndex > 0 ) {
+	if ( lastDotIndex > 0 && !options.keepExtensions ) {
 		return fileName.substr( 0, lastDotIndex );
 	}
 
