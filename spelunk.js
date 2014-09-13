@@ -15,10 +15,7 @@ module.exports = function ( root, options, done ) {
 		options = options || {};
 	}
 
-	// If root has a trailing slash, remove it
-	if ( root.substr( -1 ) === path.sep ) {
-		root = root.substr( 0, root.length - 1 );
-	}
+	root = path.resolve( root );
 
 	// Exclude .DS_Store, Thumbs.db and any other gubbins specified by the user
 	if ( !options.exclude ) {
@@ -27,18 +24,18 @@ module.exports = function ( root, options, done ) {
 		options.exclude = [ options.exclude ];
 	}
 
-	options.exclude.push( '**/*/.DS_Store', '**/*/Thumbs.db' );
+	options.exclude.push( '**/.DS_Store', '**/Thumbs.db' );
 
 	// Get the specified folder, then done
-	getDir( '', root, options, done );
+	getDir( root, root, options, done );
 
 };
 
 
-function getDir ( prefix, dir, options, gotDir ) {
-	var dirPath = path.resolve( prefix, dir );
-		
-	fs.readdir( dirPath, function ( err, files ) {
+function getDir ( root, dir, options, gotDir ) {
+	var relative = path.relative( root, dir );
+
+	fs.readdir( dir, function ( err, files ) {
 		var contents, result, remaining, check, keysAreNumeric;
 
 		if ( err ) {
@@ -48,7 +45,7 @@ function getDir ( prefix, dir, options, gotDir ) {
 
 		result = {};
 
-		contents = filterExclusions( files, dirPath, options.exclude );
+		contents = filterExclusions( files, relative, options.exclude );
 		if ( !contents.length ) {
 			gotDir( null, result );
 			return;
@@ -71,7 +68,7 @@ function getDir ( prefix, dir, options, gotDir ) {
 		contents.forEach( function ( fileName ) {
 			var filePath, key, gotFile;
 
-			filePath = path.resolve( dirPath, fileName );
+			filePath = path.join( dir, fileName );
 
 			gotFile = function ( err, data ) {
 				if ( err ) {
@@ -93,12 +90,10 @@ function getDir ( prefix, dir, options, gotDir ) {
 
 				if ( stats.isDirectory() ) {
 					key = fileName;
-					getDir( dirPath, fileName, options, gotFile );
-				}
-
-				else {
+					getDir( root, filePath, options, gotFile );
+				} else {
 					key = getKey( fileName, options );
-					getFile( dirPath, fileName, gotFile );
+					getFile( filePath, gotFile );
 				}
 
 				if ( isNaN( +key ) ) {
@@ -109,9 +104,7 @@ function getDir ( prefix, dir, options, gotDir ) {
 	});
 }
 
-function getFile ( prefix, fileName, gotFile ) {
-	var filePath = path.resolve( prefix, fileName );
-
+function getFile ( filePath, gotFile ) {
 	fs.readFile( filePath, function ( err, result ) {
 		var data;
 
@@ -155,7 +148,7 @@ function toArray ( object ) {
 }
 
 
-function filterExclusions ( files, dirPath, exclusions ) {
+function filterExclusions ( files, relative, exclusions ) {
 	if ( !exclusions ) {
 		return files;
 	}
@@ -163,8 +156,8 @@ function filterExclusions ( files, dirPath, exclusions ) {
 	return files.filter( function ( fileName ) {
 		var filePath, i;
 
-		filePath = path.resolve( dirPath, fileName );
-		
+		filePath = path.join( relative, fileName );
+
 		i = exclusions.length;
 		while ( i-- ) {
 			if ( minimatch( filePath, exclusions[i] ) ) {
