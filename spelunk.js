@@ -3,41 +3,54 @@ var fs, path, minimatch;
 fs = require( 'graceful-fs' );
 path = require( 'path' );
 minimatch = require( 'minimatch' );
+Promise = require( 'es6-promise' ).Promise;
 
 module.exports = function ( root, options, done ) {
+	var promise = new Promise( function ( fulfil, reject ) {
+		if ( typeof options === 'function' ) {
+			done = options;
+			options = {};
+		} else {
+			options = options || {};
+		}
 
-	'use strict';
+		// If root has a trailing slash, remove it
+		if ( root.substr( -1 ) === path.sep ) {
+			root = root.substr( 0, root.length - 1 );
+		}
 
-	if ( typeof options === 'function' ) {
-		done = options;
-		options = {};
-	} else {
-		options = options || {};
+		// Exclude .DS_Store, Thumbs.db and any other gubbins specified by the user
+		if ( !options.exclude ) {
+			options.exclude = [];
+		} else if ( typeof options.exclude === 'string' ) {
+			options.exclude = [ options.exclude ];
+		}
+
+		options.exclude.push( '**/*/.DS_Store', '**/*/Thumbs.db' );
+
+		// Get the specified folder, then done
+		getDir( '', root, options, function ( err, result ) {
+			if ( err ) {
+				return reject( err );
+			}
+
+			fulfil( result );
+		});
+	});
+
+	if ( done ) {
+		promise.then( function ( result ) {
+			done( null, result );
+		}, done );
 	}
 
-	// If root has a trailing slash, remove it
-	if ( root.substr( -1 ) === path.sep ) {
-		root = root.substr( 0, root.length - 1 );
-	}
-
-	// Exclude .DS_Store, Thumbs.db and any other gubbins specified by the user
-	if ( !options.exclude ) {
-		options.exclude = [];
-	} else if ( typeof options.exclude === 'string' ) {
-		options.exclude = [ options.exclude ];
-	}
-
-	options.exclude.push( '**/*/.DS_Store', '**/*/Thumbs.db' );
-
-	// Get the specified folder, then done
-	getDir( '', root, options, done );
-
+	return promise;
 };
 
 
 function getDir ( prefix, dir, options, gotDir ) {
 	var dirPath = path.resolve( prefix, dir );
-		
+
 	fs.readdir( dirPath, function ( err, files ) {
 		var contents, result, remaining, check, keysAreNumeric;
 
@@ -164,7 +177,7 @@ function filterExclusions ( files, dirPath, exclusions ) {
 		var filePath, i;
 
 		filePath = path.resolve( dirPath, fileName );
-		
+
 		i = exclusions.length;
 		while ( i-- ) {
 			if ( minimatch( filePath, exclusions[i] ) ) {
