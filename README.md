@@ -1,5 +1,4 @@
-spelunk.js
-==========
+# spelunk.js
 
 ```
 $ npm install spelunk
@@ -56,59 +55,60 @@ data
 If a file contains JSON, it is parsed as JSON; if not, it is treated as text. If a folder only contains items with numeric filenames (as in the case of the `slides` folder above), it will become an array rather than an object.
 
 
-Usage
------
+## Usage
 
-spelunk.js uses the standard Node pattern:
+spelunk.js uses the standard Node callback pattern...
 
 ```js
 callback = function ( error, result ) {
   if ( error ) {
-    // oh noes!
+    return handleError( error );
   }
 
-  doSomethingWith( result );
+  doSomething( result );
 };
 
 spelunk( 'myFolder', callback );
 ```
+
+...but it also returns a promise, because this is 2014 dammit and callbacks are a lousy flow control mechanism:
+
+```js
+spelunk( 'myFolder' ).then( doSomething, handleError );
+```
+
+
+## Options
+
+### options.exclude
 
 Exclude files that match a certain pattern (this uses [minimatch](https://github.com/isaacs/minimatch) syntax):
 
 ```js
-spelunk( 'myFolder', { exclude: '**/README.md' }, callback );
+spelunk( 'myFolder', { exclude: '**/README.md' }).then( doSomething );
 ```
 
-Flatten a folder into a JSON file, so it can be consumed by a browser with a single HTTP request (see also [grunt-spelunk](https://github.com/Rich-Harris/grunt-spelunk)):
+The value of `exclude` can be an string, or an array of strings.
+
+### options.keepExtensions
+
+If you have multiple files with the same name but different extensions, they'll conflict. This option allows you to keep their extensions, e.g. `result['config.json']` instead of `result.config` (but really, you're better off keeping your filenames distinct).
 
 ```js
-fs = require( 'fs' );
-
-callback = function ( error, result ) {
-  if ( error ) {
-    // Can you handle it / If I go there baby with you / I can handle it
-  }
-
-  fs.writeFile( 'output.json', JSON.stringify( result ) );
-};
-
-spelunk( 'myFolder', callback );
+spelunk( 'myFolder', { keepExtensions: true }).then( doSomething );
 ```
 
 
-Why the name?
--------------
+## Why the name?
 
 Because traversing a folder tree and mapping all its nooks and crannies feels a bit like spelunking. Plus it's fun to say.
 
-Testing
--------
+## Testing
 
 ```
 $ npm run test
 ```
 
-License
--------
+## License
 
 [MIT](LICENSE.md), copyright 2014 [@Rich_Harris](http://twitter.com/Rich_Harris)
