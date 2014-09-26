@@ -28,6 +28,8 @@ module.exports = function ( root, options, done ) {
 
 		options.exclude.push( '**/*/.DS_Store', '**/*/Thumbs.db' );
 
+		root = path.resolve( root );
+
 		// Get the specified folder, then done
 		getDir( '', root, options, function ( err, result ) {
 			if ( err ) {
@@ -41,17 +43,17 @@ module.exports = function ( root, options, done ) {
 	if ( done ) {
 		promise.then( function ( result ) {
 			done( null, result );
-		}, done );
+		}).catch( done );
 	}
 
 	return promise;
 };
 
 
-function getDir ( prefix, dir, options, gotDir ) {
-	var dirPath = path.resolve( prefix, dir );
+function getDir ( root, dir, options, gotDir ) {
+	var relative = path.relative( root, dir );
 
-	fs.readdir( dirPath, function ( err, files ) {
+	fs.readdir( dir, function ( err, files ) {
 		var contents, result, remaining, check, keysAreNumeric;
 
 		if ( err ) {
@@ -61,7 +63,7 @@ function getDir ( prefix, dir, options, gotDir ) {
 
 		result = {};
 
-		contents = filterExclusions( files, dirPath, options.exclude );
+		contents = filterExclusions( files, relative, options.exclude );
 		if ( !contents.length ) {
 			gotDir( null, result );
 			return;
@@ -84,7 +86,7 @@ function getDir ( prefix, dir, options, gotDir ) {
 		contents.forEach( function ( fileName ) {
 			var filePath, key, gotFile;
 
-			filePath = path.resolve( dirPath, fileName );
+			filePath = path.join( dir, fileName );
 
 			gotFile = function ( err, data ) {
 				if ( err ) {
@@ -106,12 +108,10 @@ function getDir ( prefix, dir, options, gotDir ) {
 
 				if ( stats.isDirectory() ) {
 					key = fileName;
-					getDir( dirPath, fileName, options, gotFile );
-				}
-
-				else {
-					key = getKey( fileName );
-					getFile( dirPath, fileName, gotFile );
+					getDir( root, filePath, options, gotFile );
+				} else {
+					key = getKey( fileName, options );
+					getFile( filePath, gotFile );
 				}
 
 				if ( isNaN( +key ) ) {
@@ -122,9 +122,7 @@ function getDir ( prefix, dir, options, gotDir ) {
 	});
 }
 
-function getFile ( prefix, fileName, gotFile ) {
-	var filePath = path.resolve( prefix, fileName );
-
+function getFile ( filePath, gotFile ) {
 	fs.readFile( filePath, function ( err, result ) {
 		var data;
 
@@ -144,10 +142,10 @@ function getFile ( prefix, fileName, gotFile ) {
 
 
 // Get key from path, e.g. 'project/data/config.json' -> 'config'
-function getKey ( fileName ) {
+function getKey ( fileName, options ) {
 	var lastDotIndex = fileName.lastIndexOf( '.' );
 
-	if ( lastDotIndex > 0 ) {
+	if ( lastDotIndex > 0 && !options.keepExtensions ) {
 		return fileName.substr( 0, lastDotIndex );
 	}
 
@@ -168,7 +166,7 @@ function toArray ( object ) {
 }
 
 
-function filterExclusions ( files, dirPath, exclusions ) {
+function filterExclusions ( files, relative, exclusions ) {
 	if ( !exclusions ) {
 		return files;
 	}
@@ -176,7 +174,7 @@ function filterExclusions ( files, dirPath, exclusions ) {
 	return files.filter( function ( fileName ) {
 		var filePath, i;
 
-		filePath = path.resolve( dirPath, fileName );
+		filePath = path.join( relative, fileName );
 
 		i = exclusions.length;
 		while ( i-- ) {
