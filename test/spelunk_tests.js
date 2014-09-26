@@ -43,6 +43,14 @@ var tests = [
 		options: {
 			exclude: '**/README.md'
 		}
+	},
+
+	{
+		id: 'test_07',
+		message: 'should retain file extensions',
+		options: {
+			keepExtensions: true
+		}
 	}
 ];
 
@@ -50,12 +58,13 @@ runTest = function () {
 	var test = tests.shift();
 
 	if ( !test ) {
+		process.stdout.write( 'all tests passed\n' );
 		return; // finito
 	}
 
-	console.log( '\n' + test.id + '\n=======' );
+	process.stdout.write( '.' );
 
-		spelunk( path.resolve( FIXTURES, test.id ), test.options, function ( err, actual ) {
+	spelunk( path.resolve( FIXTURES, test.id ), test.options, function ( err, actual ) {
 		var expected;
 
 		if ( err ) {
@@ -63,9 +72,6 @@ runTest = function () {
 		}
 
 		expected = JSON.parse( fs.readFileSync( path.resolve( EXPECTED, test.id + '.json' ) ).toString() );
-
-		console.log( 'result:\n', actual );
-		console.log( 'expected:\n', expected );
 
 		assert.deepEqual( actual, expected, test.message );
 

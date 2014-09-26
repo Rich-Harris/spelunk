@@ -1,0 +1,9 @@
+{
+	"someText.txt": "here is some text",
+	"object": {
+		"0.txt": "zero",
+		"1.txt": "one",
+		"2.txt": "two",
+		"3.txt": "three"
+	}
+}
