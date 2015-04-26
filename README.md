@@ -68,13 +68,19 @@ callback = function ( error, result ) {
   doSomething( result );
 };
 
-spelunk( 'myFolder', callback );
+spelunk( 'myFolder', options, callback ); // you can omit options
 ```
 
-...but it also returns a promise, because this is 2014 dammit and callbacks are a lousy flow control mechanism:
+...but it also returns a promise, because this is 2015 dammit and callbacks are a lousy flow control mechanism:
 
 ```js
-spelunk( 'myFolder' ).then( doSomething, handleError );
+spelunk( 'myFolder', options ).then( doSomething, handleError );
+```
+
+### Synchronous usage
+
+```js
+var result = spelunk.sync( 'myFolder', options );
 ```
 
 
