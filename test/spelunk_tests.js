@@ -54,7 +54,17 @@ var tests = [
 	}
 ];
 
-runTest = function () {
+// sync tests
+tests.forEach( function ( test ) {
+	var actual = spelunk.sync( path.join( FIXTURES, test.id ), test.options );
+	var expected = require( path.resolve( EXPECTED, test.id + '.json' ) );
+
+	assert.deepEqual( actual, expected, test.message );
+
+	process.stdout.write( '.' );
+});
+
+function runAsyncTest () {
 	var test = tests.shift();
 
 	if ( !test ) {
@@ -71,12 +81,12 @@ runTest = function () {
 			console.error( err );
 		}
 
-		expected = JSON.parse( fs.readFileSync( path.resolve( EXPECTED, test.id + '.json' ) ).toString() );
+		expected = require( path.resolve( EXPECTED, test.id + '.json' ) );
 
 		assert.deepEqual( actual, expected, test.message );
 
-		runTest();
+		runAsyncTest();
 	});
 };
 
-runTest();
+runAsyncTest();
