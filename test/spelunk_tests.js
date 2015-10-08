@@ -1,6 +1,8 @@
+require( 'source-map-support' ).install();
+
 var spelunk, fs, path, assert, FIXTURES, EXPECTED, tests, runTest;
 
-spelunk = require( '../spelunk' );
+spelunk = require( '..' );
 fs = require( 'fs' );
 path = require( 'path' );
 assert = require( 'assert' );

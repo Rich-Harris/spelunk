@@ -1,48 +1,43 @@
-var fs = require( 'fs' );
-var path = require( 'path' );
-var shared = require( './shared' );
+import { readdir, readFile, stat } from 'fs';
+import { join, relative } from 'path';
+import { filterExclusions, getKey, toArray } from './shared';
 
-module.exports = getDir;
+export default function getDir ( root, dir, options, gotDir ) {
+	const rel = relative( root, dir );
 
-function getDir ( root, dir, options, gotDir ) {
-	var relative = path.relative( root, dir );
-
-	fs.readdir( dir, function ( err, files ) {
-		var contents, result, remaining, check, keysAreNumeric;
-
+	readdir( dir, ( err, files ) => {
 		if ( err ) {
 			gotDir( err );
 			return;
 		}
 
-		result = {};
+		let result = {};
 
-		contents = shared.filterExclusions( files, relative, options.exclude );
+		const contents = filterExclusions( files, rel, options.exclude );
+
 		if ( !contents.length ) {
 			gotDir( null, result );
 			return;
 		}
 
-		keysAreNumeric = true; // assume we need to create an array, until we don't
+		let keysAreNumeric = true; // assume we need to create an array, until we don't
+		let remaining = contents.length;
 
-		remaining = contents.length;
-
-		check = function () {
+		function check () {
 			if ( !--remaining ) {
 				if ( keysAreNumeric ) {
-					result = shared.toArray( result );
+					result = toArray( result );
 				}
 
 				gotDir( null, result );
 			}
-		};
+		}
 
-		contents.forEach( function ( fileName ) {
-			var filePath, key, gotFile;
+		contents.forEach( fileName => {
+			const filePath = join( dir, fileName );
+			let key;
 
-			filePath = path.join( dir, fileName );
-
-			gotFile = function ( err, data ) {
+			function gotFile ( err, data ) {
 				if ( err ) {
 					gotDir( err, null );
 				} else if ( result[ key ] !== undefined ) {
@@ -51,10 +46,9 @@ function getDir ( root, dir, options, gotDir ) {
 					result[ key ] = data;
 					check();
 				}
-			};
+			}
 
-			fs.stat( filePath, function ( err, stats ) {
-
+			stat( filePath, ( err, stats ) => {
 				if ( err ) {
 					gotDir( err, null );
 					return;
@@ -64,7 +58,7 @@ function getDir ( root, dir, options, gotDir ) {
 					key = fileName;
 					getDir( root, filePath, options, gotFile );
 				} else {
-					key = shared.getKey( fileName, options );
+					key = getKey( fileName, options );
 					getFile( filePath, gotFile );
 				}
 
@@ -77,7 +71,7 @@ function getDir ( root, dir, options, gotDir ) {
 }
 
 function getFile ( filePath, gotFile ) {
-	fs.readFile( filePath, function ( err, result ) {
+	readFile( filePath, function ( err, result ) {
 		var data;
 
 		if ( err ) {
@@ -87,7 +81,9 @@ function getFile ( filePath, gotFile ) {
 
 			try {
 				data = JSON.parse( data );
-			} catch ( e ) {}
+			} catch ( e ) {
+				// treat as text
+			}
 
 			gotFile( null, data );
 		}
