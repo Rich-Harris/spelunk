@@ -44,7 +44,7 @@ export function toArray ( object ) {
 
 	for ( key in object ) {
 		if ( object.hasOwnProperty( key ) ) {
-			array[ key ] = object[ key ];
+			array[ +key ] = object[ key ];
 		}
 	}
 

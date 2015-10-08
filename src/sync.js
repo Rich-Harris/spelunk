@@ -10,7 +10,8 @@ export default function getDir ( root, dir, options ) {
 
 	if ( !files.length ) return {};
 
-	let result = files.every( isNumeric ) ? [] : {};
+	const keysAreNumeric = files.every( isNumeric );
+	let result = keysAreNumeric ? [] : {};
 
 	files.forEach( fileName => {
 		const filePath = join( dir, fileName );
@@ -22,7 +23,7 @@ export default function getDir ( root, dir, options ) {
 			throw new Error( 'You cannot have multiple files in the same folder with the same name (disregarding extensions) - failed at ' + filePath );
 		}
 
-		result[ key ] = isDir ? getDir( root, filePath, options ) : getFile( filePath );
+		result[ keysAreNumeric ? +key : key ] = isDir ? getDir( root, filePath, options ) : getFile( filePath );
 	});
 
 	return result;
