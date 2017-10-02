@@ -59,7 +59,7 @@ export default function getDir ( root, dir, options, gotDir ) {
 					getDir( root, filePath, options, gotFile );
 				} else {
 					key = getKey( fileName, options );
-					getFile( filePath, gotFile );
+					getFile( filePath, gotFile, options );
 				}
 
 				if ( isNaN( +key ) ) {
@@ -70,7 +70,7 @@ export default function getDir ( root, dir, options, gotDir ) {
 	});
 }
 
-function getFile ( filePath, gotFile ) {
+function getFile ( filePath, gotFile, options ) {
 	readFile( filePath, function ( err, result ) {
 		var data;
 
@@ -79,10 +79,14 @@ function getFile ( filePath, gotFile ) {
 		} else {
 			data = result.toString();
 
-			try {
-				data = JSON.parse( data );
-			} catch ( e ) {
-				// treat as text
+			if ( options.parser ) {
+				data = options.parser( filePath, data );
+			} else {
+				try {
+					data = JSON.parse( data );
+				} catch ( e ) {
+					// treat as text
+				}
 			}
 
 			gotFile( null, data );
