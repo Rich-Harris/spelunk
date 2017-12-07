@@ -23,19 +23,23 @@ export default function getDir ( root, dir, options ) {
 			throw new Error( 'You cannot have multiple files in the same folder with the same name (disregarding extensions) - failed at ' + filePath );
 		}
 
-		result[ keysAreNumeric ? +key : key ] = isDir ? getDir( root, filePath, options ) : getFile( filePath );
+		result[ keysAreNumeric ? +key : key ] = isDir ? getDir( root, filePath, options ) : getFile( filePath, options );
 	});
 
 	return result;
 }
 
-function getFile ( filePath ) {
+function getFile ( filePath, options ) {
 	let data = readFileSync( filePath, 'utf-8' );
 
-	try {
-		data = JSON.parse( data );
-	} catch ( e ) {
-		// treat as text
+	if ( options.parser ) {
+		data = options.parser( filePath, data );
+	} else {
+		try {
+			data = JSON.parse( data );
+		} catch ( e ) {
+			// treat as text
+		}
 	}
 
 	return data;
