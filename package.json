@@ -28,9 +28,9 @@
     "README.md"
   ],
   "dependencies": {
-    "graceful-fs": "~2.0.1",
-    "minimatch": "~0.2.14",
-    "es6-promise": "^1.0.0"
+    "es6-promise": "^1.0.0",
+    "graceful-fs": "^4.1.11",
+    "minimatch": "^3.0.4"
   },
   "scripts": {
     "test": "mocha test/test.js",
